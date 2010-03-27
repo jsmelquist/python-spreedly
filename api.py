@@ -203,7 +203,60 @@ class Client:
         </complimentary_subscription>
         ''' % (duration_quantity, duration_units, feature_level)
     
-        self.set_url('subscribers/%d/complimentary_time_extensions.xml' % subscriber_id)
+        self.set_url('subscribers/%d/complimentary_subscriptions.xml' % subscriber_id)
+        self.query(data)
+
+        # Parse
+        result = []
+        tree = fromstring(self.get_response())
+        for plan in tree.getiterator('subscriber'):
+            data = {
+                'customer_id': int(plan.findtext('customer-id')),
+                'first_name': plan.findtext('billing-first-name'),
+                'last_name': plan.findtext('billing-last-name'),
+                'active': True if plan.findtext('active') == 'true' else False,
+                'trial_active': \
+                    True if plan.findtext('on-trial') == 'true' else False,
+                'trial_elegible': \
+                    True if plan.findtext('eligible-for-free-trial') == 'true' \
+                    else False,
+                'lifetime': \
+                    True if plan.findtext('lifetime-subscription') == 'true' \
+                    else False,
+                'recurring': \
+                    True if plan.findtext('recurring') == 'true' \
+                    else False,
+                'card_expires_before_next_auto_renew': \
+                    True if plan.findtext('card-expires-before-next-auto-renew') == 'true' \
+                    else False,
+                'token': plan.findtext('token'),
+                'name': plan.findtext('subscription-plan-name'),
+                'feature_level': plan.findtext('feature-level'),
+                'created_at': datetime.strptime(
+                    plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
+                ),
+                'date_changed': datetime.strptime(
+                    plan.findtext('updated-at'), '%Y-%m-%dT%H:%M:%SZ'
+                ),
+                'active_until': datetime.strptime(
+                    plan.findtext('active-until'), '%Y-%m-%dT%H:%M:%SZ'
+                ) if plan.findtext('active-until') else None,
+            }
+
+            result.append(data)
+        return result[0]
+        
+    def lifetime_complimentary_subscription(self, subscriber_id, feature_level):
+        '''
+        Creates a lifetime complimentary subscription for the specified feature level
+        '''
+        data = '''
+        <lifetime_complimentary_subscription>
+          <feature_level>%s</feature_level>
+        </lifetime_complimentary_subscription>
+        ''' % feature_level
+
+        self.set_url('subscribers/%d/lifetime_complimentary_subscriptions.xml' % subscriber_id)
         self.query(data)
 
         # Parse
