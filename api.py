@@ -114,6 +114,7 @@ class Client:
                 'token': plan.findtext('token'),
                 'name': plan.findtext('subscription-plan-name'),
                 'feature_level': plan.findtext('feature-level'),
+                'store_credit': Decimal(plan.findtext('store-credit')),
                 'created_at': datetime.strptime(
                     plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
                 ),
@@ -178,6 +179,7 @@ class Client:
                 'token': plan.findtext('token'),
                 'name': plan.findtext('subscription-plan-name'),
                 'feature_level': plan.findtext('feature-level'),
+                'store_credit': Decimal(plan.findtext('store-credit')),
                 'created_at': datetime.strptime(
                     plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
                 ),
@@ -232,6 +234,7 @@ class Client:
                 'token': plan.findtext('token'),
                 'name': plan.findtext('subscription-plan-name'),
                 'feature_level': plan.findtext('feature-level'),
+                'store_credit': Decimal(plan.findtext('store-credit')),
                 'created_at': datetime.strptime(
                     plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
                 ),
@@ -285,6 +288,7 @@ class Client:
                 'token': plan.findtext('token'),
                 'name': plan.findtext('subscription-plan-name'),
                 'feature_level': plan.findtext('feature-level'),
+                'store_credit': Decimal(plan.findtext('store-credit')),
                 'created_at': datetime.strptime(
                     plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
                 ),
@@ -339,6 +343,7 @@ class Client:
                 'token': plan.findtext('token'),
                 'name': plan.findtext('subscription-plan-name'),
                 'feature_level': plan.findtext('feature-level'),
+                'store_credit': Decimal(plan.findtext('store-credit')),
                 'created_at': datetime.strptime(
                     plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
                 ),
@@ -352,7 +357,24 @@ class Client:
 
             result.append(data)
         return result[0]
-            
+
+
+    def add_store_credit(self, subscriber_id, amount):
+        '''
+        Adds store credit to a users subscription account
+        '''
+        data = '''
+        <credit>
+          <amount>%f</amount>
+        </credit>
+        ''' % amount
+
+        self.set_url('subscribers/%d/credits.xml' % subscriber_id)
+        self.query(data)
+
+        return self.get_response()  
+        
+        
     def cleanup(self):
         '''
         Removes ALL subscribers. NEVER USE IN PRODUCTION!
@@ -399,6 +421,7 @@ class Client:
                 'token': plan.findtext('token'),
                 'name': plan.findtext('subscription-plan-name'),
                 'feature_level': plan.findtext('feature-level'),
+                'store_credit': Decimal(plan.findtext('store-credit')),
                 'created_at': datetime.strptime(
                     plan.findtext('created-at'), '%Y-%m-%dT%H:%M:%SZ'
                 ),
